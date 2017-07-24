@@ -32,10 +32,12 @@ public class JwtAuthFilter<P extends Principal> extends AuthFilter<JwtContext, P
 
     private final JwtConsumer consumer;
     private final String cookieName;
+    private final String headerName;
 
-    private JwtAuthFilter(JwtConsumer consumer, String cookieName) {
+    private JwtAuthFilter(JwtConsumer consumer, String cookieName, String headerName) {
         this.consumer = consumer;
         this.cookieName = cookieName;
+        this.headerName = headerName;
     }
 
     @Override
@@ -94,7 +96,7 @@ public class JwtAuthFilter<P extends Principal> extends AuthFilter<JwtContext, P
     }
 
     private Optional<String> getTokenFromHeader(MultivaluedMap<String, String> headers) {
-        final String header = headers.getFirst(AUTHORIZATION);
+        final String header = headers.getFirst(this.headerName);
         if (header != null) {
             int space = header.indexOf(' ');
             if (space > 0) {
@@ -131,6 +133,7 @@ public class JwtAuthFilter<P extends Principal> extends AuthFilter<JwtContext, P
 
         private JwtConsumer consumer;
         private String cookieName;
+        private String headerName = AUTHORIZATION;
 
         public Builder<P> setJwtConsumer(JwtConsumer consumer) {
             this.consumer = consumer;
@@ -142,10 +145,15 @@ public class JwtAuthFilter<P extends Principal> extends AuthFilter<JwtContext, P
             return this;
         }
 
+        public Builder<P> setHeaderName(String headerName) {
+          this.headerName = headerName;
+          return this;
+        }
+
         @Override
         protected JwtAuthFilter<P> newInstance() {
             checkNotNull(consumer, "JwtConsumer is not set");
-            return new JwtAuthFilter<>(consumer, cookieName);
+            return new JwtAuthFilter<>(consumer, cookieName,);
         }
     }
 }
